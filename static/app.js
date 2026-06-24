@@ -107,10 +107,15 @@ function renderRows() {
     .map((article) => `
       <tr>
         <td>
-          <a class="article-link" href="${escapeAttribute(article.url)}" target="_blank" rel="noreferrer">
-            ${escapeHtml(article.title)}
-          </a>
-          <div class="muted">${escapeHtml(trimSummary(article.summary))}</div>
+          <div class="article-cell">
+            ${articleImage(article)}
+            <div>
+              <a class="article-link" href="${escapeAttribute(article.url)}" target="_blank" rel="noreferrer">
+                ${escapeHtml(article.title)}
+              </a>
+              <div class="muted">${escapeHtml(trimSummary(article.summary))}</div>
+            </div>
+          </div>
         </td>
         <td>${tags(article.platforms)}</td>
         <td>${tags(article.games.length ? article.games : ["Unclassified"])}</td>
@@ -143,6 +148,19 @@ function filteredArticles() {
 
 function tags(values) {
   return `<div class="tag-list">${values.map((value) => `<span class="tag">${escapeHtml(value)}</span>`).join("")}</div>`;
+}
+
+function articleImage(article) {
+  if (!article.image_url) return `<div class="article-image-placeholder" aria-hidden="true"></div>`;
+  return `
+    <img
+      class="article-image"
+      src="${escapeAttribute(article.image_url)}"
+      alt=""
+      loading="lazy"
+      referrerpolicy="no-referrer"
+    />
+  `;
 }
 
 function trimSummary(value) {

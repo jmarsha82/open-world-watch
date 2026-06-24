@@ -1,13 +1,14 @@
 # Open World Watch
 
-Open World Watch is a local weekly news-tracking app for gaming articles that mention `Open World` with either `PS5` or `Nintendo Switch 2`.
+Open World Watch is a local weekly news-tracking app for gaming articles about open-world games, major game platforms, PC releases, Xbox coverage, and new gaming-system news.
 
 It collects source-linked articles from configurable gaming-news RSS feeds, groups the findings by platform, inferred game title, source, tags, and price signals, then presents a dashboard plus CSV export.
 
 ## Features
 
 - Weekly or one-shot scraper for gaming news sources.
-- Matches `Open World + PS5` and `Open World + Nintendo Switch 2`.
+- Matches open-world coverage across tracked platforms.
+- Tracks PC games, Xbox games, PlayStation, Nintendo Switch, Nintendo Switch 2, Steam Deck, and new gaming-system or hardware news.
 - Keeps source URLs in both the dashboard and CSV.
 - Groups articles by platform, source, inferred game/title cluster, tags, and detected prices.
 - Exports `data/articles.csv`.
@@ -81,14 +82,19 @@ The starter list includes IGN, GameSpot, Polygon, Eurogamer, Nintendo Life, Push
 
 ## Matching Rules
 
-An article is included when it contains:
+An article is included when it contains at least one tracked platform and either open-world language or gaming-system news language.
 
-- `Open World` or `open-world`
-- at least one platform family:
-  - `PS5`, `PlayStation 5`, or `PlayStation five`
-  - `Nintendo Switch 2` or `Switch 2`
+- Open-world language:
+  - `Open World` or `open-world`
+- Gaming-system news language:
+  - new console, gaming system, next-gen hardware, handheld device, console reveal, hardware launch, or successor
+- Platform families:
+  - `PS5`, `PlayStation 5`, broader `PlayStation`, or other PS generation mentions
+  - `Nintendo Switch 2`, `Switch 2`, `Nintendo Switch`, or `Switch`
+  - `Xbox Series X|S`, broader `Xbox`, or `Game Pass`
+  - `PC`, `Windows PC`, `Steam`, `Epic Games Store`, `GOG`, or `Steam Deck`
 
-This means the app does not require both platforms in one article. If an article mentions both, both platform tags are preserved.
+This means the app does not require multiple platforms in one article. If an article mentions several, all platform tags are preserved.
 
 ## Tests
 

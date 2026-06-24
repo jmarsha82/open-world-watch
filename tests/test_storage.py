@@ -34,6 +34,7 @@ class StorageTests(unittest.TestCase):
                 games=["Example Game"],
                 prices=["$69.99"],
                 tags=["price"],
+                image_url="https://example.com/screen.jpg",
             )
 
             rows = append_articles(data_dir, [article, article])
@@ -42,6 +43,7 @@ class StorageTests(unittest.TestCase):
             with (data_dir / "articles.csv").open(encoding="utf-8") as file:
                 csv_rows = list(csv.DictReader(file))
             self.assertEqual(csv_rows[0]["platforms"], "PS5")
+            self.assertNotIn("image_url", csv_rows[0])
 
     def test_export_csv_empty_rows_still_writes_header(self):
         with tempfile.TemporaryDirectory() as tmp:

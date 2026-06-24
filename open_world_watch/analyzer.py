@@ -6,8 +6,27 @@ from typing import Any
 
 PLATFORM_PATTERNS = {
     "PS5": re.compile(r"\b(ps5|playstation\s*5|playstation\s+five)\b", re.I),
+    "PlayStation": re.compile(r"\b(playstation|ps4|ps6|playstation\s*4|playstation\s*6)\b", re.I),
     "Nintendo Switch 2": re.compile(r"\b(nintendo\s+switch\s*2|switch\s*2)\b", re.I),
+    "Nintendo Switch": re.compile(r"\b(nintendo\s+switch|switch)\b", re.I),
+    "Xbox Series X|S": re.compile(r"\b(xbox\s+series\s+(?:x|s|x\s*/\s*s|x\|s)|series\s+(?:x|s))\b", re.I),
+    "Xbox": re.compile(r"\b(xbox|game\s+pass)\b", re.I),
+    "PC": re.compile(r"\b(pc|windows\s+pc|steam|epic\s+games\s+store|gog)\b", re.I),
+    "Steam Deck": re.compile(r"\b(steam\s+deck|steamdeck)\b", re.I),
 }
+
+SYSTEM_NEWS_PATTERN = re.compile(
+    r"\b("
+    r"new\s+(?:gaming\s+)?(?:console|system|hardware|handheld|device)|"
+    r"next[-\s]?gen\s+(?:console|system|hardware|handheld|device)|"
+    r"gaming\s+(?:console|system|hardware|handheld|device)|"
+    r"console\s+(?:launch|reveal|announcement|announced|rumor|leak|hardware)|"
+    r"hardware\s+(?:launch|reveal|announcement|announced|rumor|leak)|"
+    r"handheld\s+(?:console|gaming|pc|device)|"
+    r"successor"
+    r")\b",
+    re.I,
+)
 
 PRICE_PATTERN = re.compile(
     r"(?<!\w)(?:\$|USD\s*)\d{1,3}(?:,\d{3})*(?:\.\d{2})?|\b\d{1,3}(?:\.\d{2})?\s*(?:USD|dollars)\b",
@@ -15,7 +34,11 @@ PRICE_PATTERN = re.compile(
 )
 
 GAME_PATTERNS = [
-    re.compile(r"(?P<game>[A-Z][A-Za-z0-9:'\-]+(?:\s+[A-Z0-9][A-Za-z0-9:'\-]+){0,5})\s+(?:for|on)\s+(?:PS5|PlayStation 5|Nintendo Switch 2|Switch 2)", re.I),
+    re.compile(
+        r"(?P<game>[A-Z][A-Za-z0-9:'\-]+(?:\s+[A-Z0-9][A-Za-z0-9:'\-]+){0,5})\s+(?:for|on)\s+"
+        r"(?:PS5|PlayStation 5|PlayStation|Nintendo Switch 2|Switch 2|Nintendo Switch|Xbox Series X|Xbox Series S|Xbox|PC|Steam|Steam Deck)",
+        re.I,
+    ),
     re.compile(r"(?:open world|open-world)\s+(?:game|rpg|adventure|title)\s+(?P<game>[A-Z][A-Za-z0-9:'\-]+(?:\s+[A-Z0-9][A-Za-z0-9:'\-]+){0,4})", re.I),
     re.compile(r"(?P<game>[A-Z][A-Za-z0-9:'\-]+(?:\s+[A-Z0-9][A-Za-z0-9:'\-]+){0,5})\s+(?:is|gets|launches|arrives|announced)", re.I),
 ]
@@ -25,10 +48,17 @@ STOP_GAME_WORDS = {
     "Nintendo Switch",
     "Nintendo Switch 2",
     "PlayStation 5",
+    "PlayStation",
     "PS5",
+    "Xbox",
+    "Xbox Series X",
+    "Xbox Series S",
+    "PC",
+    "Steam Deck",
     "The Game",
     "This Game",
     "New Open",
+    "New Xbox",
 }
 
 
@@ -38,6 +68,8 @@ def analyze_text(title: str, summary: str = "") -> dict[str, list[str]]:
     matched_terms: list[str] = []
     if "open world" in normalized or "open-world" in normalized:
         matched_terms.append("Open World")
+    if SYSTEM_NEWS_PATTERN.search(haystack):
+        matched_terms.append("Gaming System News")
 
     platforms = [
         platform
@@ -62,7 +94,9 @@ def analyze_text(title: str, summary: str = "") -> dict[str, list[str]]:
 
 def is_relevant(title: str, summary: str = "") -> bool:
     result = analyze_text(title, summary)
-    return "Open World" in result["matched_terms"] and bool(result["platforms"])
+    if not result["platforms"]:
+        return False
+    return "Open World" in result["matched_terms"] or "Gaming System News" in result["matched_terms"]
 
 
 def extract_games(text: str) -> list[str]:
@@ -91,6 +125,8 @@ def classify_tags(text: str, platforms: list[str], prices: list[str]) -> list[st
         "price": ["price", "preorder", "pre-order", "discount", "sale"],
         "exclusive": ["exclusive", "console exclusive"],
         "update": ["update", "patch", "dlc", "expansion"],
+        "system news": ["console", "hardware", "handheld", "system", "next-gen", "next gen"],
+        "pc": ["pc", "steam", "windows"],
     }
     for tag, needles in keyword_map.items():
         if any(needle in lower for needle in needles):

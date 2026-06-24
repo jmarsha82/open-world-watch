@@ -36,9 +36,30 @@ class AnalyzerTests(unittest.TestCase):
         self.assertIn("price", result["tags"])
         self.assertIn("70 dollars", result["prices"])
 
+    def test_relevant_pc_and_xbox_open_world_articles(self):
+        pc_result = analyze_text("Crimson Harbor launches as an open world RPG on PC and Steam")
+        xbox_result = analyze_text("Azure Fields open-world adventure arrives on Xbox Series X")
+
+        self.assertTrue(is_relevant("Crimson Harbor launches as an open world RPG on PC and Steam"))
+        self.assertTrue(is_relevant("Azure Fields open-world adventure arrives on Xbox Series X"))
+        self.assertIn("PC", pc_result["platforms"])
+        self.assertIn("Xbox Series X|S", xbox_result["platforms"])
+
+    def test_relevant_new_gaming_system_news_without_open_world(self):
+        result = analyze_text(
+            "Xbox successor console reveal reportedly coming this fall",
+            "The new gaming system would include handheld hardware features.",
+        )
+
+        self.assertTrue(is_relevant("Xbox successor console reveal reportedly coming this fall"))
+        self.assertIn("Gaming System News", result["matched_terms"])
+        self.assertIn("Xbox", result["platforms"])
+        self.assertIn("system news", result["tags"])
+
     def test_requires_open_world_and_platform(self):
         self.assertFalse(is_relevant("A PS5 racing game gets an update"))
         self.assertFalse(is_relevant("A new open world RPG is teased"))
+        self.assertFalse(is_relevant("A new gaming system rumor has no platform named"))
 
     def test_summary_counts_groups(self):
         summary = summarize_articles(

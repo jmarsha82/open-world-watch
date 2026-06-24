@@ -48,5 +48,55 @@
     "name": "GamesRadar",
     "url": "https://www.gamesradar.com/rss/",
     "type": "rss"
+  },
+  {
+    "name": "PC Gamer",
+    "url": "https://www.pcgamer.com/rss/",
+    "type": "rss"
+  },
+  {
+    "name": "VG247",
+    "url": "https://www.vg247.com/feed",
+    "type": "rss"
+  },
+  {
+    "name": "Siliconera",
+    "url": "https://www.siliconera.com/feed/",
+    "type": "rss"
+  },
+  {
+    "name": "TheGamer",
+    "url": "https://www.thegamer.com/feed/",
+    "type": "rss"
+  },
+  {
+    "name": "Destructoid",
+    "url": "https://www.destructoid.com/feed/",
+    "type": "rss"
+  },
+  {
+    "name": "Kotaku",
+    "url": "https://kotaku.com/rss",
+    "type": "rss"
+  },
+  {
+    "name": "Game Informer",
+    "url": "https://www.gameinformer.com/rss.xml",
+    "type": "rss"
+  },
+  {
+    "name": "GamesIndustry.biz",
+    "url": "https://www.gamesindustry.biz/feed",
+    "type": "rss"
+  },
+  {
+    "name": "Xbox Wire",
+    "url": "https://news.xbox.com/en-us/feed/",
+    "type": "rss"
+  },
+  {
+    "name": "PlayStation Blog",
+    "url": "https://blog.playstation.com/feed/",
+    "type": "rss"
   }
 ]

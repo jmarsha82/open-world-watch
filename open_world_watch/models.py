@@ -29,6 +29,7 @@ class Article:
     games: list[str]
     prices: list[str]
     tags: list[str] = field(default_factory=list)
+    image_url: str = ""
     collected_at: str = field(default_factory=utc_now_iso)
 
     def to_dict(self) -> dict[str, Any]:

@@ -15,6 +15,7 @@ from open_world_watch.scraper import (
     parse_date,
     parse_rss,
     run_scan,
+    image_url_from_html,
 )
 
 
@@ -45,8 +46,24 @@ class ScraperTests(unittest.TestCase):
         assert article is not None
         self.assertEqual(article.source, "Test Source")
         self.assertEqual(article.url, "https://example.com/story")
+        self.assertEqual(article.image_url, "")
         self.assertIn("PS5", article.platforms)
         self.assertIn("USD 59.99", article.prices)
+
+    def test_article_from_entry_normalizes_image_url(self):
+        article = article_from_entry(
+            Source(name="Test Source", url="https://example.com/feed"),
+            {
+                "title": "Crimson Harbor announced as open world title for PS5",
+                "url": "https://example.com/news/story?utm_source=nope",
+                "summary": "Launch price is USD 59.99.",
+                "published": "2026-06-23T10:00:00+00:00",
+                "image_url": "/images/screen.jpg?utm_medium=nope&id=7",
+            },
+        )
+
+        assert article is not None
+        self.assertEqual(article.image_url, "https://example.com/images/screen.jpg?id=7")
 
     def test_dedupe_articles_uses_article_id(self):
         source = Source(name="Test", url="https://example.com")
@@ -69,6 +86,7 @@ class ScraperTests(unittest.TestCase):
                 <title>Open world PS5 report</title>
                 <link>https://example.com/report</link>
                 <description>Summary</description>
+                <media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://example.com/screen.jpg" />
                 <pubDate>Tue, 23 Jun 2026 12:30:00 GMT</pubDate>
               </item>
             </channel></rss>
@@ -79,6 +97,7 @@ class ScraperTests(unittest.TestCase):
 
         self.assertEqual(entries[0]["title"], "Open world PS5 report")
         self.assertEqual(entries[0]["url"], "https://example.com/report")
+        self.assertEqual(entries[0]["image_url"], "https://example.com/screen.jpg")
 
     def test_parse_atom_items(self):
         import xml.etree.ElementTree as ET
@@ -90,6 +109,7 @@ class ScraperTests(unittest.TestCase):
                 <title>Open world Switch 2 report</title>
                 <link href="https://example.com/atom" rel="alternate" />
                 <summary>Summary</summary>
+                <link href="https://example.com/atom.jpg" rel="enclosure" type="image/jpeg" />
                 <updated>2026-06-23T12:30:00+00:00</updated>
               </entry>
             </feed>
@@ -100,6 +120,10 @@ class ScraperTests(unittest.TestCase):
 
         self.assertEqual(entries[0]["title"], "Open world Switch 2 report")
         self.assertEqual(entries[0]["url"], "https://example.com/atom")
+        self.assertEqual(entries[0]["image_url"], "https://example.com/atom.jpg")
+
+    def test_image_url_from_html_extracts_img_src(self):
+        self.assertEqual(image_url_from_html('<p><img src="https://example.com/a.jpg"></p>'), "https://example.com/a.jpg")
 
     @patch("open_world_watch.scraper.urllib.request.urlopen")
     def test_fetch_rss_entries_falls_back_to_atom(self, urlopen):

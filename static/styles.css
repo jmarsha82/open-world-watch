@@ -346,6 +346,29 @@ td {
   line-height: 1.35;
 }
 
+.article-cell {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+}
+
+.article-image,
+.article-image-placeholder {
+  width: 96px;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-2);
+  object-fit: cover;
+}
+
+.article-image-placeholder {
+  background:
+    linear-gradient(135deg, rgba(0, 168, 107, 0.18), rgba(34, 103, 255, 0.16)),
+    var(--surface-2);
+}
+
 .article-link {
   color: var(--text);
   font-weight: 800;

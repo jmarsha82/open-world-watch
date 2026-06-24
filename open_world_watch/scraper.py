@@ -78,12 +78,14 @@ def fetch_rss_entries(source: Source, limit: int = 50) -> list[dict[str, str]]:
 def parse_rss(root: ET.Element) -> list[dict[str, str]]:
     entries: list[dict[str, str]] = []
     for item in root.findall(".//item"):
+        summary = first_text(item, ["description", "summary", "content:encoded"])
         entries.append(
             {
                 "title": text_of(item, "title"),
                 "url": text_of(item, "link"),
-                "summary": first_text(item, ["description", "summary", "content:encoded"]),
+                "summary": summary,
                 "published": first_text(item, ["pubDate", "published", "updated"]),
+                "image_url": image_url_from_entry(item, summary),
             }
         )
     return entries
@@ -100,12 +102,14 @@ def parse_atom(root: ET.Element) -> list[dict[str, str]]:
             if href and rel == "alternate":
                 link = href
                 break
+        summary = first_text(entry, [f"{namespace}summary", f"{namespace}content"])
         entries.append(
             {
                 "title": text_of(entry, f"{namespace}title"),
                 "url": link,
-                "summary": first_text(entry, [f"{namespace}summary", f"{namespace}content"]),
+                "summary": summary,
                 "published": first_text(entry, [f"{namespace}published", f"{namespace}updated"]),
+                "image_url": image_url_from_entry(entry, summary),
             }
         )
     return entries
@@ -131,6 +135,7 @@ def article_from_entry(source: Source, entry: dict[str, str]) -> Article | None:
         games=analysis["games"],
         prices=analysis["prices"],
         tags=analysis["tags"],
+        image_url=normalize_image_url(entry.get("image_url", ""), url),
     )
 
 
@@ -143,6 +148,8 @@ def dedupe_articles(articles: list[Article]) -> list[Article]:
 
 def text_of(node: ET.Element, tag: str) -> str:
     found = node.find(tag)
+    if found is None:
+        found = first_child_by_local_name(node, tag)
     return found.text.strip() if found is not None and found.text else ""
 
 
@@ -162,6 +169,46 @@ def namespace_of(tag: str) -> str:
 def clean_html(value: str) -> str:
     without_tags = re.sub(r"<[^>]+>", " ", value)
     return re.sub(r"\s+", " ", html.unescape(without_tags)).strip()
+
+
+def image_url_from_entry(entry: ET.Element, summary: str) -> str:
+    for child in entry.iter():
+        tag_name = local_name(child.tag)
+        image_url = child.attrib.get("url", "") or child.attrib.get("href", "")
+        media_type = child.attrib.get("type", "")
+        media_medium = child.attrib.get("medium", "")
+        if image_url and tag_name in {"thumbnail", "image"}:
+            return image_url
+        if image_url and tag_name == "link" and child.attrib.get("rel") == "enclosure" and media_type.startswith("image/"):
+            return image_url
+        if image_url and tag_name == "content" and (media_medium == "image" or media_type.startswith("image/")):
+            return image_url
+        if image_url and tag_name == "enclosure" and media_type.startswith("image/"):
+            return image_url
+    return image_url_from_html(summary)
+
+
+def image_url_from_html(value: str) -> str:
+    match = re.search(r"<img\b[^>]*\bsrc=[\"']?([^\"'\s>]+)", value, re.IGNORECASE)
+    return html.unescape(match.group(1)) if match else ""
+
+
+def normalize_image_url(image_url: str, base_url: str) -> str:
+    if not image_url:
+        return ""
+    return normalize_url(urllib.parse.urljoin(base_url, image_url.strip()))
+
+
+def first_child_by_local_name(node: ET.Element, tag: str) -> ET.Element | None:
+    target_name = local_name(tag)
+    for child in node:
+        if local_name(child.tag) == target_name:
+            return child
+    return None
+
+
+def local_name(tag: str) -> str:
+    return tag.rsplit("}", 1)[-1].split(":", 1)[-1]
 
 
 def normalize_url(url: str) -> str:
