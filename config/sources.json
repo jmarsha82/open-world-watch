@@ -1,0 +1,52 @@
+[
+  {
+    "name": "IGN",
+    "url": "https://feeds.ign.com/ign/games-all",
+    "type": "rss"
+  },
+  {
+    "name": "GameSpot",
+    "url": "https://www.gamespot.com/feeds/mashup/",
+    "type": "rss"
+  },
+  {
+    "name": "Polygon",
+    "url": "https://www.polygon.com/rss/index.xml",
+    "type": "rss"
+  },
+  {
+    "name": "Eurogamer",
+    "url": "https://www.eurogamer.net/feed",
+    "type": "rss"
+  },
+  {
+    "name": "Nintendo Life",
+    "url": "https://www.nintendolife.com/feeds/latest",
+    "type": "rss"
+  },
+  {
+    "name": "Push Square",
+    "url": "https://www.pushsquare.com/feeds/latest",
+    "type": "rss"
+  },
+  {
+    "name": "Gematsu",
+    "url": "https://www.gematsu.com/feed",
+    "type": "rss"
+  },
+  {
+    "name": "Video Games Chronicle",
+    "url": "https://www.videogameschronicle.com/feed/",
+    "type": "rss"
+  },
+  {
+    "name": "Rock Paper Shotgun",
+    "url": "https://www.rockpapershotgun.com/feed",
+    "type": "rss"
+  },
+  {
+    "name": "GamesRadar",
+    "url": "https://www.gamesradar.com/rss/",
+    "type": "rss"
+  }
+]

@@ -1,0 +1,70 @@
+import unittest
+
+from open_world_watch.analyzer import analyze_text, is_relevant, summarize_articles
+
+
+class AnalyzerTests(unittest.TestCase):
+    def test_relevant_ps5_open_world_article(self):
+        result = analyze_text(
+            "Crimson Harbor launches as an open world game for PS5",
+            "The preorder price is $69.99 with a new gameplay trailer.",
+        )
+
+        self.assertTrue(is_relevant("Crimson Harbor launches as an open world game for PS5"))
+        self.assertIn("Open World", result["matched_terms"])
+        self.assertIn("PS5", result["platforms"])
+        self.assertIn("$69.99", result["prices"])
+        self.assertIn("Crimson Harbor", result["games"])
+        self.assertIn("price", result["tags"])
+
+    def test_relevant_switch_2_open_world_article(self):
+        result = analyze_text(
+            "Open-world adventure Azure Fields arrives on Nintendo Switch 2",
+            "A release date trailer confirms the new version.",
+        )
+
+        self.assertIn("Nintendo Switch 2", result["platforms"])
+        self.assertIn("release date", result["tags"])
+        self.assertIn("trailer", result["tags"])
+
+    def test_price_signal_is_tagged_without_price_word(self):
+        result = analyze_text(
+            "Open world game Star Trail for PlayStation 5",
+            "Available at 70 dollars during launch week.",
+        )
+
+        self.assertIn("price", result["tags"])
+        self.assertIn("70 dollars", result["prices"])
+
+    def test_requires_open_world_and_platform(self):
+        self.assertFalse(is_relevant("A PS5 racing game gets an update"))
+        self.assertFalse(is_relevant("A new open world RPG is teased"))
+
+    def test_summary_counts_groups(self):
+        summary = summarize_articles(
+            [
+                {
+                    "source": "IGN",
+                    "platforms": ["PS5"],
+                    "games": ["Crimson Harbor"],
+                    "prices": ["$69.99"],
+                    "tags": ["price", "PS5"],
+                },
+                {
+                    "source": "Polygon",
+                    "platforms": ["Nintendo Switch 2"],
+                    "games": [],
+                    "prices": [],
+                    "tags": ["Nintendo Switch 2"],
+                },
+            ]
+        )
+
+        self.assertEqual(summary["total_articles"], 2)
+        self.assertEqual(summary["platform_counts"]["PS5"], 1)
+        self.assertEqual(summary["game_counts"]["Unclassified"], 1)
+        self.assertEqual(summary["price_signal_count"], 1)
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Open World Watch</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">OW</div>
+          <div>
+            <h1>Open World Watch</h1>
+            <p>Weekly scan</p>
+          </div>
+        </div>
+
+        <section class="side-section">
+          <h2>Query Set</h2>
+          <div class="query-box">
+            <span>Open World + PS5</span>
+            <span>Open World + Nintendo Switch 2</span>
+          </div>
+        </section>
+
+        <section class="side-section">
+          <h2>Sources</h2>
+          <div id="sourceList" class="source-list"></div>
+        </section>
+
+        <section class="side-section run-card">
+          <h2>Run Status</h2>
+          <p id="lastRun">No scan recorded yet.</p>
+          <button id="runScan" class="primary-button" type="button">
+            <span class="button-icon">↻</span>
+            Run scan now
+          </button>
+        </section>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="page-label">Gaming news intelligence</p>
+            <h2>Open-world coverage report</h2>
+          </div>
+          <div class="topbar-actions">
+            <label class="search">
+              <span>Search</span>
+              <input id="searchInput" type="search" placeholder="Game, source, tag..." />
+            </label>
+            <select id="platformFilter" aria-label="Platform filter">
+              <option value="all">All platforms</option>
+              <option value="PS5">PS5</option>
+              <option value="Nintendo Switch 2">Nintendo Switch 2</option>
+            </select>
+            <a class="secondary-button" href="/export/articles.csv">Export CSV</a>
+          </div>
+        </header>
+
+        <section class="metrics-grid" aria-label="Report metrics">
+          <article>
+            <span>Articles</span>
+            <strong id="metricArticles">0</strong>
+          </article>
+          <article>
+            <span>Platform mix</span>
+            <strong id="metricPlatforms">0</strong>
+          </article>
+          <article>
+            <span>Game clusters</span>
+            <strong id="metricGames">0</strong>
+          </article>
+          <article>
+            <span>Price signals</span>
+            <strong id="metricPrices">0</strong>
+          </article>
+        </section>
+
+        <section class="report-grid">
+          <article class="panel chart-panel">
+            <div class="panel-heading">
+              <h3>Platform mix</h3>
+              <p>Articles by detected platform</p>
+            </div>
+            <div id="platformChart" class="bar-chart"></div>
+          </article>
+
+          <article class="panel chart-panel">
+            <div class="panel-heading">
+              <h3>Game clusters</h3>
+              <p>Most mentioned inferred titles</p>
+            </div>
+            <div id="gameChart" class="bar-chart"></div>
+          </article>
+        </section>
+
+        <section class="panel table-panel">
+          <div class="panel-heading table-heading">
+            <div>
+              <h3>Source articles</h3>
+              <p>Matched by Open World plus either target platform family.</p>
+            </div>
+            <span id="rowCount" class="row-count">0 results</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Platform</th>
+                  <th>Game</th>
+                  <th>Price</th>
+                  <th>Source</th>
+                  <th>Published</th>
+                </tr>
+              </thead>
+              <tbody id="articleRows"></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>
