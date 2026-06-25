@@ -19,29 +19,33 @@
         </div>
 
         <section class="side-section">
-          <h2>Query Set</h2>
+          <h2>Navigation</h2>
           <div class="query-box">
-            <span>Open World + any tracked platform</span>
-            <span>New gaming systems and hardware</span>
+            <button id="dashboardNav" class="nav-button active" type="button">Dashboard</button>
+            <button id="sourcesNav" class="nav-button" type="button">Sources</button>
           </div>
         </section>
 
         <section class="side-section">
-          <h2>Sources</h2>
-          <div id="sourceList" class="source-list"></div>
+          <h2>New Queries</h2>
+          <form id="queryForm" class="query-form">
+            <input id="queryInput" type="text" placeholder="Phrase to scan..." />
+            <button class="secondary-dark-button" type="submit">Run</button>
+          </form>
+          <div id="queryList" class="saved-query-list"></div>
         </section>
 
         <section class="side-section run-card">
           <h2>Run Status</h2>
           <p id="lastRun">No scan recorded yet.</p>
           <button id="runScan" class="primary-button" type="button">
-            <span class="button-icon">↻</span>
+            <span class="button-icon">R</span>
             Run scan now
           </button>
         </section>
       </aside>
 
-      <main class="workspace">
+      <main id="dashboardView" class="workspace">
         <header class="topbar">
           <div>
             <p class="page-label">Gaming news intelligence</p>
@@ -98,7 +102,7 @@
           <article class="panel chart-panel">
             <div class="panel-heading">
               <h3>Game clusters</h3>
-              <p>Most mentioned inferred titles</p>
+              <p>Most mentioned detected game titles</p>
             </div>
             <div id="gameChart" class="bar-chart"></div>
           </article>
@@ -108,9 +112,12 @@
           <div class="panel-heading table-heading">
             <div>
               <h3>Source articles</h3>
-              <p>Matched by game platform, open-world coverage, or new gaming-system signals.</p>
+              <p id="articleFilterLabel">Matched by game platform, open-world coverage, or new gaming-system signals.</p>
             </div>
-            <span id="rowCount" class="row-count">0 results</span>
+            <div class="row-tools">
+              <button id="clearDrilldown" class="small-button" type="button" hidden>Clear</button>
+              <span id="rowCount" class="row-count">0 results</span>
+            </div>
           </div>
           <div class="table-wrap">
             <table>
@@ -127,6 +134,26 @@
               <tbody id="articleRows"></tbody>
             </table>
           </div>
+        </section>
+      </main>
+
+      <main id="sourcesView" class="workspace hidden">
+        <header class="topbar">
+          <div>
+            <p class="page-label">Source directory</p>
+            <h2>RSS Sources</h2>
+          </div>
+        </header>
+
+        <section class="panel source-directory-panel">
+          <div class="panel-heading">
+            <div>
+              <h3>Tracked outlets</h3>
+              <p>Homepage links for every configured RSS source.</p>
+            </div>
+            <span id="sourceCount" class="row-count">0 sources</span>
+          </div>
+          <div id="sourceDirectory" class="source-directory"></div>
         </section>
       </main>
     </div>

@@ -14,6 +14,7 @@ class Source:
     name: str
     url: str
     type: str = "rss"
+    homepage: str = ""
 
 
 @dataclass(slots=True)

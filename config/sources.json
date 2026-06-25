@@ -2,101 +2,121 @@
   {
     "name": "IGN",
     "url": "https://feeds.ign.com/ign/games-all",
-    "type": "rss"
+    "type": "rss",
+    "homepage": "https://www.ign.com/games"
   },
   {
     "name": "GameSpot",
     "url": "https://www.gamespot.com/feeds/mashup/",
-    "type": "rss"
+    "type": "rss",
+    "homepage": "https://www.gamespot.com/"
   },
   {
     "name": "Polygon",
     "url": "https://www.polygon.com/rss/index.xml",
-    "type": "rss"
+    "type": "rss",
+    "homepage": "https://www.polygon.com/"
   },
   {
     "name": "Eurogamer",
     "url": "https://www.eurogamer.net/feed",
-    "type": "rss"
+    "type": "rss",
+    "homepage": "https://www.eurogamer.net/"
   },
   {
     "name": "Nintendo Life",
     "url": "https://www.nintendolife.com/feeds/latest",
-    "type": "rss"
+    "type": "rss",
+    "homepage": "https://www.nintendolife.com/"
   },
   {
     "name": "Push Square",
     "url": "https://www.pushsquare.com/feeds/latest",
-    "type": "rss"
+    "type": "rss",
+    "homepage": "https://www.pushsquare.com/"
   },
   {
     "name": "Gematsu",
     "url": "https://www.gematsu.com/feed",
-    "type": "rss"
+    "type": "rss",
+    "homepage": "https://www.gematsu.com/"
   },
   {
     "name": "Video Games Chronicle",
     "url": "https://www.videogameschronicle.com/feed/",
-    "type": "rss"
+    "type": "rss",
+    "homepage": "https://www.videogameschronicle.com/"
   },
   {
     "name": "Rock Paper Shotgun",
     "url": "https://www.rockpapershotgun.com/feed",
-    "type": "rss"
+    "type": "rss",
+    "homepage": "https://www.rockpapershotgun.com/"
   },
   {
     "name": "GamesRadar",
     "url": "https://www.gamesradar.com/rss/",
-    "type": "rss"
+    "type": "rss",
+    "homepage": "https://www.gamesradar.com/"
   },
   {
     "name": "PC Gamer",
     "url": "https://www.pcgamer.com/rss/",
-    "type": "rss"
+    "type": "rss",
+    "homepage": "https://www.pcgamer.com/"
   },
   {
     "name": "VG247",
     "url": "https://www.vg247.com/feed",
-    "type": "rss"
+    "type": "rss",
+    "homepage": "https://www.vg247.com/"
   },
   {
     "name": "Siliconera",
     "url": "https://www.siliconera.com/feed/",
-    "type": "rss"
+    "type": "rss",
+    "homepage": "https://www.siliconera.com/"
   },
   {
     "name": "TheGamer",
     "url": "https://www.thegamer.com/feed/",
-    "type": "rss"
+    "type": "rss",
+    "homepage": "https://www.thegamer.com/"
   },
   {
     "name": "Destructoid",
     "url": "https://www.destructoid.com/feed/",
-    "type": "rss"
+    "type": "rss",
+    "homepage": "https://www.destructoid.com/"
   },
   {
     "name": "Kotaku",
     "url": "https://kotaku.com/rss",
-    "type": "rss"
+    "type": "rss",
+    "homepage": "https://kotaku.com/"
   },
   {
     "name": "Game Informer",
     "url": "https://www.gameinformer.com/rss.xml",
-    "type": "rss"
+    "type": "rss",
+    "homepage": "https://www.gameinformer.com/"
   },
   {
     "name": "GamesIndustry.biz",
     "url": "https://www.gamesindustry.biz/feed",
-    "type": "rss"
+    "type": "rss",
+    "homepage": "https://www.gamesindustry.biz/"
   },
   {
     "name": "Xbox Wire",
     "url": "https://news.xbox.com/en-us/feed/",
-    "type": "rss"
+    "type": "rss",
+    "homepage": "https://news.xbox.com/"
   },
   {
     "name": "PlayStation Blog",
     "url": "https://blog.playstation.com/feed/",
-    "type": "rss"
+    "type": "rss",
+    "homepage": "https://blog.playstation.com/"
   }
 ]

@@ -28,7 +28,7 @@ def load_sources(path: Path) -> list[Source]:
     return [Source(**item) for item in payload]
 
 
-def run_scan(source_path: Path, data_dir: Path, limit_per_source: int = 50) -> ScanResult:
+def run_scan(source_path: Path, data_dir: Path, limit_per_source: int = 50, query: str = "") -> ScanResult:
     started_at = utc_now_iso()
     run_id = hashlib.sha1(started_at.encode("utf-8")).hexdigest()[:12]
     sources = load_sources(source_path)
@@ -40,7 +40,7 @@ def run_scan(source_path: Path, data_dir: Path, limit_per_source: int = 50) -> S
             entries = fetch_rss_entries(source, limit=limit_per_source)
             for entry in entries:
                 article = article_from_entry(source, entry)
-                if article and is_relevant(article.title, article.summary):
+                if article and is_relevant(article.title, article.summary, query=query):
                     articles.append(article)
         except (urllib.error.URLError, ET.ParseError, TimeoutError, OSError) as exc:
             errors.append({"source": source.name, "error": str(exc)})

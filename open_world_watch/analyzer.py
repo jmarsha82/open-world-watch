@@ -35,16 +35,27 @@ PRICE_PATTERN = re.compile(
 
 GAME_PATTERNS = [
     re.compile(
+        r"(?P<game>[A-Z][A-Za-z0-9:'\-]+(?:\s+[A-Z0-9][A-Za-z0-9:'\-]+){0,5})\s+"
+        r"(?:launches|arrives|announced|revealed|delayed|gets|receives)\b.*?\b(?:for|on)\s+"
+        r"(?:PS5|PlayStation 5|PlayStation|Nintendo Switch 2|Switch 2|Nintendo Switch|Xbox Series X|Xbox Series S|Xbox|PC|Steam|Steam Deck)",
+        re.I,
+    ),
+    re.compile(
         r"(?P<game>[A-Z][A-Za-z0-9:'\-]+(?:\s+[A-Z0-9][A-Za-z0-9:'\-]+){0,5})\s+(?:for|on)\s+"
         r"(?:PS5|PlayStation 5|PlayStation|Nintendo Switch 2|Switch 2|Nintendo Switch|Xbox Series X|Xbox Series S|Xbox|PC|Steam|Steam Deck)",
         re.I,
     ),
-    re.compile(r"(?:open world|open-world)\s+(?:game|rpg|adventure|title)\s+(?P<game>[A-Z][A-Za-z0-9:'\-]+(?:\s+[A-Z0-9][A-Za-z0-9:'\-]+){0,4})", re.I),
-    re.compile(r"(?P<game>[A-Z][A-Za-z0-9:'\-]+(?:\s+[A-Z0-9][A-Za-z0-9:'\-]+){0,5})\s+(?:is|gets|launches|arrives|announced)", re.I),
+    re.compile(r"(?:open world|open-world)\s+(?:game|rpg|adventure|title)\s+(?!for\b|on\b)(?P<game>[A-Z][A-Za-z0-9:'\-]+(?:\s+[A-Z0-9][A-Za-z0-9:'\-]+){0,4})", re.I),
 ]
 
 STOP_GAME_WORDS = {
+    "A New",
+    "An Open",
+    "Gaming System",
     "Open World",
+    "Open World Game",
+    "Open World RPG",
+    "Open World Adventure",
     "Nintendo Switch",
     "Nintendo Switch 2",
     "PlayStation 5",
@@ -92,7 +103,9 @@ def analyze_text(title: str, summary: str = "") -> dict[str, list[str]]:
     }
 
 
-def is_relevant(title: str, summary: str = "") -> bool:
+def is_relevant(title: str, summary: str = "", query: str = "") -> bool:
+    if query:
+        return matches_query(title, summary, query)
     result = analyze_text(title, summary)
     if not result["platforms"]:
         return False
@@ -104,7 +117,7 @@ def extract_games(text: str) -> list[str]:
     for pattern in GAME_PATTERNS:
         for match in pattern.finditer(text):
             game = clean_game_name(match.group("game"))
-            if game and game not in STOP_GAME_WORDS:
+            if is_likely_game_name(game):
                 found.append(game)
     return unique(found)[:5]
 
@@ -112,7 +125,33 @@ def extract_games(text: str) -> list[str]:
 def clean_game_name(value: str) -> str:
     cleaned = re.sub(r"\s+", " ", value.strip(" -:|.,"))
     cleaned = re.sub(r"\b(?:Review|Preview|Trailer|News|Guide|Update)$", "", cleaned, flags=re.I).strip()
+    cleaned = re.sub(r"^(?:new|upcoming|the)\s+", "", cleaned, flags=re.I).strip()
     return cleaned
+
+
+def is_likely_game_name(value: str) -> bool:
+    if not value or value in STOP_GAME_WORDS:
+        return False
+    words = value.split()
+    if len(words) < 2:
+        return False
+    lowered = value.lower()
+    blocked_fragments = ["open world", "gaming system", "console", "hardware", "platform"]
+    return not any(fragment in lowered for fragment in blocked_fragments)
+
+
+def query_keywords(query: str) -> list[str]:
+    stop_words = {"a", "an", "and", "for", "from", "in", "new", "of", "on", "or", "the", "to", "with"}
+    words = re.findall(r"[A-Za-z0-9][A-Za-z0-9+'-]*", query.lower())
+    return unique([word for word in words if len(word) > 2 and word not in stop_words])
+
+
+def matches_query(title: str, summary: str, query: str) -> bool:
+    keywords = query_keywords(query)
+    if not keywords:
+        return False
+    haystack = f"{title}\n{summary}".lower()
+    return all(keyword in haystack for keyword in keywords)
 
 
 def classify_tags(text: str, platforms: list[str], prices: list[str]) -> list[str]:
@@ -149,7 +188,7 @@ def summarize_articles(rows: list[dict[str, Any]]) -> dict[str, Any]:
             platform_counts[platform] += 1
         for tag in row.get("tags", []):
             tag_counts[tag] += 1
-        for game in row.get("games", []) or ["Unclassified"]:
+        for game in row.get("games", []):
             game_counts[game] += 1
         source_counts[row.get("source", "Unknown")] += 1
         if row.get("prices"):

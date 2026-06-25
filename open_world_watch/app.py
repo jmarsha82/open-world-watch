@@ -49,10 +49,22 @@ class OpenWorldWatchHandler(BaseHTTPRequestHandler):
     def do_POST(self) -> None:
         parsed = urlparse(self.path)
         if parsed.path == "/api/run-scan":
-            scan = run_scan(SOURCE_PATH, DATA_DIR)
+            payload = self.read_json_body()
+            query = str(payload.get("query", "")).strip() if isinstance(payload, dict) else ""
+            scan = run_scan(SOURCE_PATH, DATA_DIR, query=query)
             self.send_json(scan.to_dict(), status=HTTPStatus.CREATED)
             return
         self.send_error(HTTPStatus.NOT_FOUND, "Unknown endpoint")
+
+    def read_json_body(self) -> object:
+        content_length = int(self.headers.get("Content-Length", "0") or "0")
+        if content_length <= 0:
+            return {}
+        try:
+            body = self.rfile.read(content_length)
+            return json.loads(body.decode("utf-8"))
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            return {}
 
     def send_json(self, payload: object, status: HTTPStatus = HTTPStatus.OK) -> None:
         body = json.dumps(payload, ensure_ascii=False).encode("utf-8")

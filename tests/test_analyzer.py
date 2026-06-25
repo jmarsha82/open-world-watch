@@ -1,6 +1,6 @@
 import unittest
 
-from open_world_watch.analyzer import analyze_text, is_relevant, summarize_articles
+from open_world_watch.analyzer import analyze_text, is_relevant, matches_query, summarize_articles
 
 
 class AnalyzerTests(unittest.TestCase):
@@ -56,6 +56,19 @@ class AnalyzerTests(unittest.TestCase):
         self.assertIn("Xbox", result["platforms"])
         self.assertIn("system news", result["tags"])
 
+    def test_game_clusters_ignore_headline_fragments(self):
+        result = analyze_text(
+            "Xbox successor console reveal reportedly coming this fall",
+            "The new gaming system would include handheld hardware features.",
+        )
+
+        self.assertEqual(result["games"], [])
+
+    def test_custom_query_matches_keywords_without_platform_requirement(self):
+        self.assertTrue(matches_query("Hollow Knight Silksong release date trailer", "", "Silksong release trailer"))
+        self.assertTrue(is_relevant("Hollow Knight Silksong release date trailer", query="Silksong release trailer"))
+        self.assertFalse(matches_query("Hollow Knight Silksong trailer", "", "Metroid Prime 4"))
+
     def test_requires_open_world_and_platform(self):
         self.assertFalse(is_relevant("A PS5 racing game gets an update"))
         self.assertFalse(is_relevant("A new open world RPG is teased"))
@@ -83,7 +96,7 @@ class AnalyzerTests(unittest.TestCase):
 
         self.assertEqual(summary["total_articles"], 2)
         self.assertEqual(summary["platform_counts"]["PS5"], 1)
-        self.assertEqual(summary["game_counts"]["Unclassified"], 1)
+        self.assertNotIn("Unclassified", summary["game_counts"])
         self.assertEqual(summary["price_signal_count"], 1)
 
 

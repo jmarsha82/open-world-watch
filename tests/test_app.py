@@ -44,7 +44,10 @@ class AppTests(unittest.TestCase):
             source_path = root / "sources.json"
             data_dir.mkdir()
             static_dir.mkdir()
-            source_path.write_text('[{"name":"Test","url":"https://example.com/feed","type":"rss"}]', encoding="utf-8")
+            source_path.write_text(
+                '[{"name":"Test","url":"https://example.com/feed","type":"rss","homepage":"https://example.com/"}]',
+                encoding="utf-8",
+            )
             (static_dir / "index.html").write_text("<h1>Open World Watch</h1>", encoding="utf-8")
             article = Article(
                 id="abc",
@@ -79,6 +82,7 @@ class AppTests(unittest.TestCase):
                 self.assertEqual(articles[0]["title"], "Open world PS5 article")
                 self.assertEqual(summary["total_articles"], 1)
                 self.assertEqual(sources[0]["name"], "Test")
+                self.assertEqual(sources[0]["homepage"], "https://example.com/")
                 self.assertEqual(history, [])
                 self.assertIn("Open world PS5 article", csv_text)
                 with self.assertRaises(urllib.error.HTTPError) as missing:
@@ -191,6 +195,47 @@ class AppTests(unittest.TestCase):
             main()
 
         run_scan_mock.assert_called_once()
+
+    @patch("open_world_watch.app.run_scan")
+    def test_post_run_scan_passes_custom_query(self, run_scan):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            data_dir = root / "data"
+            static_dir = root / "static"
+            source_path = root / "sources.json"
+            data_dir.mkdir()
+            static_dir.mkdir()
+            source_path.write_text("[]", encoding="utf-8")
+            run_scan.return_value = ScanResult(
+                run_id="run",
+                started_at="2026-06-23T00:00:00+00:00",
+                finished_at="2026-06-23T00:00:01+00:00",
+                sources_checked=0,
+                articles_found=0,
+                errors=[],
+                articles=[],
+            )
+
+            old_data, old_source, old_static = app.DATA_DIR, app.SOURCE_PATH, app.STATIC_DIR
+            app.DATA_DIR, app.SOURCE_PATH, app.STATIC_DIR = data_dir, source_path, static_dir
+            server = ThreadingHTTPServer(("127.0.0.1", 0), OpenWorldWatchHandler)
+            thread = threading.Thread(target=server.serve_forever, daemon=True)
+            thread.start()
+            request = urllib.request.Request(
+                f"http://127.0.0.1:{server.server_address[1]}/api/run-scan",
+                data=json.dumps({"query": "Silksong release date"}).encode("utf-8"),
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
+            try:
+                response = urllib.request.urlopen(request)
+
+                self.assertEqual(response.status, 201)
+                run_scan.assert_called_once_with(source_path, data_dir, query="Silksong release date")
+            finally:
+                server.shutdown()
+                thread.join(timeout=5)
+                app.DATA_DIR, app.SOURCE_PATH, app.STATIC_DIR = old_data, old_source, old_static
 
 
 if __name__ == "__main__":
