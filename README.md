@@ -13,7 +13,7 @@ It collects source-linked articles from configurable gaming-news RSS feeds, grou
 - Groups articles by platform, source, inferred game/title cluster, tags, and detected prices.
 - Exports `data/articles.csv`.
 - Runs as a local web app with no login credentials.
-- Uses only the Python standard library.
+- Uses `defusedxml` for safer RSS/Atom XML parsing.
 
 ## Quick Start
 
@@ -78,7 +78,7 @@ The CSV includes:
 
 Edit `config/sources.json` to add or remove RSS sources.
 
-The starter list includes IGN, GameSpot, Polygon, Eurogamer, Nintendo Life, Push Square, Gematsu, Video Games Chronicle, Rock Paper Shotgun, and GamesRadar.
+The starter list includes IGN, GameSpot, Polygon, Eurogamer, Nintendo Life, Push Square, Gematsu, Video Games Chronicle, Rock Paper Shotgun, GamesRadar, PC Gamer, VG247, Siliconera, TheGamer, Destructoid, Kotaku, Game Informer, GamesIndustry.biz, Xbox Wire, and PlayStation Blog.
 
 ## Matching Rules
 
@@ -98,10 +98,18 @@ This means the app does not require multiple platforms in one article. If an art
 
 ## Tests
 
+All unit tests live under the unified `tests/` directory:
+
+- `tests/test_analyzer.py`
+- `tests/test_app.py`
+- `tests/test_scraper.py`
+- `tests/test_storage.py`
+- `tests/check_coverage.py`
+
 Run the unit tests:
 
 ```powershell
-python -m unittest discover -s tests
+python -m pytest
 ```
 
 Run tests with the built-in coverage gate:
@@ -111,6 +119,25 @@ python tests\check_coverage.py
 ```
 
 The coverage gate expects at least 90% line coverage.
+
+Run the same local static checks used by CI:
+
+```powershell
+python -m ruff check open_world_watch tests
+python -m bandit -r open_world_watch -q
+```
+
+## GitHub Pipeline
+
+The repository includes `.github/workflows/ci.yml`, which runs on pushes and pull requests to `main` and `dev`, and can also be started manually.
+
+- `Unit Tests / Python 3.11` and `Unit Tests / Python 3.12`: install the app, run `python -m pytest`, then run `python tests/check_coverage.py`.
+- `Code Scanning / Quality`: runs Ruff static analysis over `open_world_watch` and `tests`.
+- `Code Scanning / Security`: runs Bandit against application code. On public repositories, it also runs GitHub CodeQL for Python and uses Dependency Review on pull requests.
+
+The CodeQL and Dependency Review steps are gated to public repositories because GitHub code scanning features are free for public repositories and may require GitHub Advanced Security on private repositories.
+
+Dependabot is configured in `.github/dependabot.yml` to open weekly update pull requests for GitHub Actions and Python package dependencies.
 
 ## Notes
 

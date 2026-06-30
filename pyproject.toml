@@ -1,9 +1,19 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "open-world-watch"
 version = "0.1.0"
-description = "Weekly gaming news tracker for Open World coverage on PS5 or Nintendo Switch 2."
+description = "Weekly gaming news tracker for open-world games, platforms, and gaming-system news."
 requires-python = ">=3.11"
 readme = "README.md"
+dependencies = [
+    "defusedxml>=0.7.1",
+]
 
 [tool.coverage]
 minimum_line_coverage = 90
+
+[tool.setuptools.packages.find]
+include = ["open_world_watch*"]

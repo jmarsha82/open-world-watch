@@ -8,11 +8,11 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
-import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 from pathlib import Path
-from typing import Any
+
+import defusedxml.ElementTree as ET
 
 from .analyzer import analyze_text, is_relevant
 from .models import Article, ScanResult, Source, utc_now_iso
@@ -30,7 +30,7 @@ def load_sources(path: Path) -> list[Source]:
 
 def run_scan(source_path: Path, data_dir: Path, limit_per_source: int = 50, query: str = "") -> ScanResult:
     started_at = utc_now_iso()
-    run_id = hashlib.sha1(started_at.encode("utf-8")).hexdigest()[:12]
+    run_id = hashlib.sha256(started_at.encode("utf-8")).hexdigest()[:12]
     sources = load_sources(source_path)
     articles: list[Article] = []
     errors: list[dict[str, str]] = []
@@ -42,7 +42,7 @@ def run_scan(source_path: Path, data_dir: Path, limit_per_source: int = 50, quer
                 article = article_from_entry(source, entry)
                 if article and is_relevant(article.title, article.summary, query=query):
                     articles.append(article)
-        except (urllib.error.URLError, ET.ParseError, TimeoutError, OSError) as exc:
+        except (urllib.error.URLError, ET.ParseError, TimeoutError, OSError, ValueError) as exc:
             errors.append({"source": source.name, "error": str(exc)})
         time.sleep(0.6)
 
@@ -65,8 +65,9 @@ def run_scan(source_path: Path, data_dir: Path, limit_per_source: int = 50, quer
 
 
 def fetch_rss_entries(source: Source, limit: int = 50) -> list[dict[str, str]]:
+    validate_feed_url(source.url)
     request = urllib.request.Request(source.url, headers={"User-Agent": USER_AGENT})
-    with urllib.request.urlopen(request, timeout=DEFAULT_TIMEOUT_SECONDS) as response:
+    with urllib.request.urlopen(request, timeout=DEFAULT_TIMEOUT_SECONDS) as response:  # nosec B310
         payload = response.read()
     root = ET.fromstring(payload)
     entries = parse_rss(root)
@@ -122,7 +123,7 @@ def article_from_entry(source: Source, entry: dict[str, str]) -> Article | None:
     if not title or not url:
         return None
     analysis = analyze_text(title, summary)
-    article_id = hashlib.sha1(f"{source.name}|{url}".encode("utf-8")).hexdigest()
+    article_id = hashlib.sha256(f"{source.name}|{url}".encode("utf-8")).hexdigest()
     return Article(
         id=article_id,
         title=title,
@@ -218,6 +219,12 @@ def normalize_url(url: str) -> str:
     query = urllib.parse.parse_qsl(parsed.query, keep_blank_values=True)
     filtered = [(key, value) for key, value in query if not key.lower().startswith("utm_")]
     return urllib.parse.urlunsplit((parsed.scheme, parsed.netloc, parsed.path, urllib.parse.urlencode(filtered), ""))
+
+
+def validate_feed_url(url: str) -> None:
+    parsed = urllib.parse.urlsplit(url)
+    if parsed.scheme not in {"http", "https"}:
+        raise ValueError(f"Unsupported source URL scheme: {parsed.scheme or 'missing'}")
 
 
 def parse_date(value: str) -> str:
